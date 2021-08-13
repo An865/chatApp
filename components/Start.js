@@ -9,8 +9,8 @@ const background = require('../assets/Background-Image.png');
 // icon
 const icon = require('../assets/person.png');
 
-// background-color options - Black, Purple, Blue, Green, White
-const colors = ['#212224', '#6b5d99', '#5d6599', '#acba9e', '#ffffff'];
+/* background-color options - Black, Purple, Blue, Green, White
+'#212224', '#6b5d99', '#5d6599', '#acba9e', '#ffffff'*/
 
 export default class Start extends React.Component {
 

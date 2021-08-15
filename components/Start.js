@@ -9,9 +9,6 @@ const background = require('../assets/Background-Image.png');
 // icon
 const icon = require('../assets/person.png');
 
-/* background-color options - Black, Purple, Blue, Green, White
-'#212224', '#6b5d99', '#5d6599', '#acba9e', '#ffffff'*/
-
 export default class Start extends React.Component {
 
    constructor(props) {
@@ -55,22 +52,37 @@ export default class Start extends React.Component {
                   <View style={styles.backgroundColorChoices}>
                      <TouchableOpacity
                         style={styles.backgroundSelection1}
+                        accessibilityLabel="color option 1"
+                        accessibilityHint="Let’s you choose to a preferred background color"
+                        accessibilityRole="button"
                         onPress={() => this.setState({ background: '#212224' })}
                      />
                      <TouchableOpacity
                         style={styles.backgroundSelection2}
+                        accessibilityLabel="color option 2"
+                        accessibilityHint="Let’s you choose to a preferred background color"
+                        accessibilityRole="button"
                         onPress={() => this.setState({ background: '#6b5d99' })}
                      />
                      <TouchableOpacity
                         style={styles.backgroundSelection3}
+                        accessibilityLabel="color option 3"
+                        accessibilityHint="Let’s you choose to a preferred background color"
+                        accessibilityRole="button"
                         onPress={() => this.setState({ background: '#5d6599' })}
                      />
                      <TouchableOpacity
                         style={styles.backgroundSelection4}
+                        accessibilityLabel="color option 4"
+                        accessibilityHint="Let’s you choose to a preferred background color"
+                        accessibilityRole="button"
                         onPress={() => this.setState({ background: '#acba9e' })}
                      />
                      <TouchableOpacity
                         style={styles.backgroundSelection5}
+                        accessibilityLabel="color option 5"
+                        accessibilityHint="Let’s you choose to a preferred background color"
+                        accessibilityRole="button"
                         onPress={() => this.setState({ background: '#ffffff' })}
                      />
                   </View>
@@ -78,6 +90,9 @@ export default class Start extends React.Component {
 
                <TouchableOpacity
                   style={styles.button}
+                  accessibilityLabel="Proceed to Chat"
+                  accessibilityHint="Provides access to chat application from home screen"
+                  accessibilityRole="button"
                   onPress={() => this.handleOnPressButton(this.state.username, this.state.background)}
                >
                   <Text style={styles.buttonText}>Start Chatting</Text>

@@ -4,38 +4,71 @@ import { GiftedChat, Bubble } from 'react-native-gifted-chat'
 
 export default class Chat extends React.Component {
 
-  constructor() {
-    super();
+  constructor(props){
+    super(props);
     this.state = {
-      messages: [],
       username: '',
       background: '',
+      messages: []
     }
   }
 
 
   //render chat bubble with specific styling
   renderBubble(props) {
-    return (
-      <Bubble
+    if (this.state.background == '#ffffff')
+    { 
+      return (
+        //if user selects white background make text black else text is white
+        <Bubble
+          {...props}
+          wrapperStyle={{
+            right: {
+              backgroundColor: this.state.background,
+            }
+          }}
+          textStyle={{
+            right: {
+              color: '#000000'
+            }
+          }}
+          timeTextStyle={{
+            right: {
+              color: '#000000'
+            }
+          }}
+        />
+      )
+    } else {
+      return(
+        <Bubble
         {...props}
         wrapperStyle={{
           right: {
-            backgroundColor: '#000'
+            backgroundColor: this.state.background,
+          }
+        }}
+        textStyle={{
+          right: {
+            color: '#ffffff'
+          }
+        }}
+        timeTextStyle={{
+          right: {
+            color: '#ffffff'
           }
         }}
       />
-    )
+      )
+    }
   }
 
 
   setnavigationBar(){
-    //put username in navigation bar
-    this.props.navigation.setOptions({ title: `Welcome ${this.state.username}!` });
-
-    //change navigation background color based on user's choice
+    let user = this.state.username;
+    //display username and change navigation background color based on user's choice
       this.props.navigation.setOptions({
-        title: `Welcome ${this.state.username}`,
+        title: `Welcome ${user}!`,
         headerStyle: {
           backgroundColor: `${this.state.background}`,
         },
@@ -52,13 +85,16 @@ export default class Chat extends React.Component {
 
   componentDidMount(){
     //set state to set username and background color and to track messages
+    const username = this.props.route.params.username;
+    const background = this.props.route.params.background;
+
     this.setState({
-      username: this.props.route.params.username,
-      background: this.props.route.params.background,
+      username: username,
+      background: background,
       messages: [
         {
           _id: 1,
-          text: 'Hello developer',
+          text: 'Hello Developer',
           createdAt: new Date(),
           user: {
             _id: 2,
@@ -68,15 +104,18 @@ export default class Chat extends React.Component {
         },
         {
           _id: 2,
-          text: `${this.state.username} has entered the chat`,
+          text: `${username} has entered the chat`,
           createdAt: new Date(),
           system: true,
          },
       ],
+    }, () => { //must use callback here because setState is async and state change may not register
+      //call function to set username and color in nav bar
+      this.setnavigationBar();
     })
 
-    //call function to set username and color in nav bar
-    this.setnavigationBar();
+  
+   
   }
 
   //message a user sends gets appends to the previous state so both appear in the cat
@@ -87,7 +126,6 @@ export default class Chat extends React.Component {
   }
 
   render() {
-
     return (
       <View style={styles.chatContainer}>
         <GiftedChat

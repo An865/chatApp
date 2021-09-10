@@ -1,62 +1,124 @@
 import React from 'react';
 import { View, Text, KeyboardAvoidingView, StyleSheet} from 'react-native';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat'
+import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+
+//import firebase for database
+const firebase = require('firebase');
+require('firebase/firestore');
+
 
 export default class Chat extends React.Component {
 
   constructor(props){
     super(props);
+
     this.state = {
       username: '',
       background: '',
-      messages: []
+      messages: [],
+      uid: 0,
+      loggedInText: 'Please wait, you are getting logged in',
+      user: {
+        _id: '',
+        name: '',
+        avatar: '',
+      }
     }
+
+    //firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAf0wOxnpco0t3gTMcLRZfskXNN7CfXbv4",
+      authDomain: "messages-ac034.firebaseapp.com",
+      projectId: "messages-ac034",
+      storageBucket: "messages-ac034.appspot.com",
+      messagingSenderId: "712325807826",
+      appId: "1:712325807826:web:c05519d7411751c69bf70b",
+      measurementId: "G-45BST4B2MY"
+    };
+    
+    //initialize firebase app
+    if (!firebase.apps.length){
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    //reference to firebase collection 'messages'
+    this.referenceChatMessages = firebase.firestore().collection('messages');
+    //Current reference to user is set to null
+    this.referenceMessageUser = null;
   }
 
 
+  componentDidMount() {
+    //set state to set username and background color and to track messages
+    const username = this.props.route.params.username;
+    const background = this.props.route.params.background;
+
+    //check if user is signed in and if not sign-in via anonymous sign-in
+    this.authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        firebase.auth().signInAnonymously();
+      }
+      //update user state with current active user
+      this.setState({
+        username: username,
+        background: background,
+        uid: user.uid,
+        user: {
+          _id: user.uid,
+          name: username,
+          avatar: 'https://placeimg.com/140/140/any',
+        },
+        messages: [],
+        loggedInText: 'You Are Logged In',
+      }, ()=>{this.setnavigationBar()} 
+      );
+      //Reference to current users messages
+      this.referenceMessagesUser = firebase.firestore().collection('messages').where('uid', '==', this.state.uid);
+      //take snapshot of current state of messages collection on firebase
+      this.unsubscribe = this.referenceChatMessages.orderBy("createdAt", "desc").onSnapshot(this.onCollectionUpdate);
+    });
+  }
+
   //render chat bubble with specific styling
   renderBubble(props) {
-    if (this.state.background == '#ffffff')
+    backgroundColor = this.state.background;
+    if (backgroundColor == '#ffffff')
+    //if user selects white background
     { 
       return (
-        //if user selects white background make text black else text is white
+        //make user text white and other user's background black with white text
         <Bubble
           {...props}
           wrapperStyle={{
-            right: {
-              backgroundColor: this.state.background,
-            }
+            right: {backgroundColor: backgroundColor},
+            left: {backgroundColor: '#ebd5d5'}
           }}
-          textStyle={{
-            right: {
-              color: '#000000'
-            }
+          textProps={{
+            style: { color: '#000000'}
           }}
           timeTextStyle={{
-            right: {
-              color: '#000000'
-            }
+            right: {color: '#000000'},
+            left: {color: '#000000'}
           }}
         />
       )
     } else {
+      //else (user's background is not white) make their text white and other user's background black with white text
       return(
         <Bubble
         {...props}
         wrapperStyle={{
-          right: {
-            backgroundColor: this.state.background,
-          }
+          right: { backgroundColor: backgroundColor},
+          left: {backgroundColor: '#ebd5d5'}
         }}
         textStyle={{
-          right: {
-            color: '#ffffff'
-          }
+          right: {color: '#ffffff'},
+          left: {color: '#000000'}
+
         }}
         timeTextStyle={{
-          right: {
-            color: '#ffffff'
-          }
+          right: {color: '#ffffff'},
+          left: {color: '#000000'}
         }}
       />
       )
@@ -83,58 +145,68 @@ export default class Chat extends React.Component {
       }
   }
 
-  componentDidMount(){
-    //set state to set username and background color and to track messages
-    const username = this.props.route.params.username;
-    const background = this.props.route.params.background;
-
+  onCollectionUpdate = (querySnapshot) => {
+    //when collection updates take snapshot and go through it to save each document to 'messages'
+    const messages = [];
+    // go through each document
+    querySnapshot.forEach((doc) => {
+      // get the QueryDocumentSnapshot's data
+      let data = doc.data();
+      //append data to messages array
+      messages.push({
+        _id: data._id,
+        createdAt: data.createdAt.toDate(),
+        text: data.text,
+        user: {
+          _id: data.user._id,
+          name: data.user.name,
+          avatar: data.user.avatar
+        }
+      });
+    });
+    //update state of messages array
     this.setState({
-      username: username,
-      background: background,
-      messages: [
-        {
-          _id: 1,
-          text: 'Hello Developer',
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: 'React Native',
-            avatar: 'https://placeimg.com/140/140/any',
-          },
-        },
-        {
-          _id: 2,
-          text: `${username} has entered the chat`,
-          createdAt: new Date(),
-          system: true,
-         },
-      ],
-    }, () => { //must use callback here because setState is async and state change may not register
-      //call function to set username and color in nav bar
-      this.setnavigationBar();
+      messages
     })
-
-  
-   
   }
 
-  //message a user sends gets appends to the previous state so both appear in the cat
+  addMessage(){
+    //add incoming messages to firebase database
+    const message = this.state.messages[0];
+    this.referenceChatMessages.add({
+      //add the following data regarding the message
+      uid: this.state.uid,
+      _id: message._id,
+      createdAt: message.createdAt,
+      text: message.text || null,
+      user: message.user,
+    })
+  }
+
+  componentWillUnmount() {
+    //unsubscribe to stop recieving updates about collection in firebase
+    this.authUnsubscribe();
+ }
+
   onSend(messages = []) {
+    //message from another user gets appended to the previous state so both appear in the chat
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
-    }))
+    }), ()=>{
+      //addMessage function saves messages to database
+      this.addMessage();
+    })
   }
 
   render() {
     return (
       <View style={styles.chatContainer}>
+        <Text>{this.state.loggedInText}</Text>
         <GiftedChat
           renderBubble={this.renderBubble.bind(this)}
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
-          user={{
-            _id: 1,
-          }}
+          user={this.state.user}
         />
         {/* compensate for keyboard on android phone obstructing view */}
         { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null

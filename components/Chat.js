@@ -4,6 +4,9 @@ import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+//custom chat actions component
+import CustomActions from './CustomActions';
+
 //import firebase for database
 const firebase = require('firebase');
 require('firebase/firestore');

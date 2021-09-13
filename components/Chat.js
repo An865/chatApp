@@ -1,13 +1,17 @@
 import React from 'react';
 import { View, Text, KeyboardAvoidingView, StyleSheet} from 'react-native';
 import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
+//netinfo is used to determine online/offline status
 import NetInfo from '@react-native-community/netinfo';
+//async storage used for offline data retrieval/storage
 import AsyncStorage from '@react-native-async-storage/async-storage';
+//map view component to render map
+import MapView from 'react-native-maps';
 
-//custom chat actions component
+//custom actions component for sharing images and location
 import CustomActions from './CustomActions';
 
-//import firebase for database
+//import firebase database
 const firebase = require('firebase');
 require('firebase/firestore');
 
@@ -195,7 +199,9 @@ export default class Chat extends React.Component {
           _id: data.user._id,
           name: data.user.name,
           avatar: data.user.avatar
-        }
+        },
+        image: data.image || null,
+        location: data.location || null,
       });
     });
     //update state of messages array
@@ -268,6 +274,33 @@ export default class Chat extends React.Component {
     }
   }
 
+  renderCustomActions = (props) => {
+    //display custom actions component
+    return <CustomActions {...props} />;
+  };
+
+  renderCustomView (props) {
+    //render map view
+    const { currentMessage} = props;
+    if (currentMessage.location) {
+      return (
+          <MapView
+            style={{width: 150,
+              height: 100,
+              borderRadius: 13,
+              margin: 3}}
+            region={{
+              latitude: currentMessage.location.latitude,
+              longitude: currentMessage.location.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+          />
+      );
+    }
+    return null;
+  }
+
   render() {
     return (
       <View style={styles.chatContainer}>
@@ -275,6 +308,8 @@ export default class Chat extends React.Component {
         <GiftedChat
           renderBubble={this.renderBubble.bind(this)}
           renderInputToolbar={this.renderInputToolbar.bind(this)}
+          renderActions={this.renderCustomActions}
+          renderCustomView={this.renderCustomView} 
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
           user={this.state.user}

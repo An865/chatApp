@@ -11,7 +11,6 @@ require('firebase/firestore');
 
 export default class CustomActions extends React.Component {
 
-
   onActionPress = () => {
     //handle the various options presented from pressing the + button
     const options = ['Choose From Library', 'Take Picture', 'Send Location', 'Cancel'];

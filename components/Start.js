@@ -32,7 +32,7 @@ export default class Start extends React.Component {
     return (
       <View style={styles.container}>
          <ImageBackground source={background} style={styles.background}>
-            <Text style={styles.title}>App Title</Text>
+            <Text style={styles.title}> Chat App</Text>
 
             <View style={styles.contentBox}>
 

@@ -17,15 +17,15 @@ You will need the following:
 - Node.js
 - Expo Account
 - Expo CLI
-    npm install --global expo-cli
+> npm install --global expo-cli
 - Expo Mobile App (to run the app on a mobile device)
 - Android Studio/iOS Simulator (MacOS only) (to run the app locally via an emulator/simulator)
 
 ## Set up
 - To begin download or clone this repository and install dependencies
-    npm install
+> npm install
 - To run the project from the terminal use:
-    expo start
+> expo start
 - To run on a Mobile
 Use your mobile device's camera to scan the QR code to launch the app in expo
 - To run on Simulator/Emulator

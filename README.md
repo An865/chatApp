@@ -11,6 +11,7 @@ Chat App is a native application for mobile devices that allows users to chat wi
 - Expo 
 - Gifted Chat
 - Google Firestore Database
+- Dependencies can be viewed in the package.json in the root directory
 
 ## Requirements
 You will need the following:
